@@ -1,0 +1,22 @@
+from proxmoxer import ProxmoxAPI
+
+def create_proxmox_vm(node, vmid, name, ostype, iso, disk_size, cores, memory, model, bridge):
+    proxmox = ProxmoxAPI('your_proxmox_host', user='your_username', password='your_password', verify_ssl=False)
+    node = proxmox.nodes(node)
+    vm = node.qemu.create(
+        vmid=vmid,
+        name=name,
+        ostype=ostype,
+        ide2=iso + ',media=cdrom',
+        ide0='ceph_pool:' + str(disk_size) + ',format=qcow2',
+        sockets=1,
+        cores=cores,
+        numa=0,
+        pool='your_proxmox_pool',
+        memory=memory,
+        net0=model + ',bridge=' + bridge
+    )
+    return vm
+
+# Example usage
+create_proxmox_vm('proxmox01', 100, 'Test VM', 'l26', 'iso_image', 50, 2, 4096, 'virtio', 'vmbr0')
